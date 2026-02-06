@@ -138,26 +138,25 @@
     }
 
     .photo{
-      height: 250px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      position:relative;
-      overflow:hidden;
+  height: 250px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  position:relative;
+  overflow:hidden;
 
-      /* Put your photo in the repo as "us.jpg" (same folder as index.html) */
-      background-image:
-        linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.30)),
-        url("us.jpg");
-      background-size: cover;
-      background-position: center;
-    }
+  background-image: url("us.jpg");
+  background-size: cover;
+  background-position: center;
+}
 
     /* develop overlay */
     .develop{
-      position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.80), rgba(0,0,0,0.18));
+      position:absolute;
+      inset:0;
+      background:#000;
       opacity:1;
-      transition: opacity .9s ease;
+      transition: opacity 1.2s ease;
+      z-index:5;
     }
     .photo.ready .develop{opacity:0}
 
@@ -615,10 +614,13 @@
 
     // polaroid develop
     photo.addEventListener("click", () => {
+      if (photo.classList.contains("ready")) return;
+      
       photo.classList.add("ready");
       capright.textContent = "okay… continue 😌";
-      chip.textContent = "💞 unlocked vibes";
+      chip.textContent = "Unlocked vibes";
       showToast("cute, right? 💗");
+
     });
 
     // personalize
@@ -774,7 +776,7 @@
       popConfetti();
       showToast("YESS 💗");
 
-      s3.textContent = "locked in. screenshot this for me 🥹💞";
+      s3.textContent = "locked in forever";
       yes.disabled = true;
 
       // Freeze NO once she says yes
