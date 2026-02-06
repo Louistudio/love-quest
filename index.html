@@ -422,7 +422,7 @@
           </div>
           <div class="caption">
             <div class="capleft" id="capleft">hey beautiful…</div>
-            <div class="capright" id="capright">tap to reveal</div>
+            <div class="capright" id="capright">Tap box to reveal</div>
           </div>
         </section>
 
@@ -449,9 +449,7 @@
             <div class="status" id="s2"></div>
           </div>
 
-          <div class="center">
-            <button class="btn ghost" id="skip">skip</button>
-          </div>
+
         </div>
 
         <!-- Stage C: question -->
@@ -509,7 +507,7 @@
     const qText = document.getElementById("qText");
     const choices = document.getElementById("choices");
     const s2 = document.getElementById("s2");
-    const skip = document.getElementById("skip");
+
 
     const bigQ = document.getElementById("bigQ");
     const p2 = document.getElementById("p2");
@@ -705,13 +703,7 @@
       }
     }
 
-    skip.addEventListener("click", () => {
-      stageB.style.display = "none";
-      stageC.style.display = "block";
-      showToast("okay okay… straight to it");
-      armNoFloat();
-    });
-
+   
     // NO runs away smoothly like it’s floating away
     function randomEdgeSafePosition(btn){
       const rect = btn.getBoundingClientRect();
