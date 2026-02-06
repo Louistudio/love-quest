@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff3b7a" />
+  <title>Love Quest</title>
+  <style>
+    :root{
+      --bg1:#0b0b12;
+      --bg2:#1a0f1b;
+      --card:rgba(255,255,255,0.06);
+      --card2:rgba(255,255,255,0.10);
+      --stroke:rgba(255,255,255,0.16);
+      --text:rgba(255,255,255,0.92);
+      --muted:rgba(255,255,255,0.68);
+      --hot:#ff3b7a;
+      --hot2:#ff7aa8;
+      --gold:#ffd38a;
+      --shadow: 0 26px 80px rgba(0,0,0,0.55);
+      --radius: 22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 700px at 15% 15%, rgba(255,59,122,0.16), transparent 60%),
+        radial-gradient(900px 600px at 85% 35%, rgba(255,211,138,0.12), transparent 55%),
+        radial-gradient(1000px 700px at 50% 110%, rgba(120,81,255,0.11), transparent 55%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .noise{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.12;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 28px 16px;
+    }
+
+    .shell{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 880px){
+      .shell{grid-template-columns: 1fr}
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .panel .topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: rgba(255,255,255,0.80);
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:99px;
+      background: linear-gradient(135deg, var(--hot), var(--hot2));
+      box-shadow: 0 0 20px rgba(255,59,122,0.6);
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.78);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .content{
+      padding: 18px 18px 20px;
+    }
+
+    h1{
+      margin: 6px 0 8px;
+      font-size: clamp(28px, 4.6vw, 46px);
+      letter-spacing: -0.03em;
+      line-height:1.05;
+    }
+
+    .sub{
+      margin:0 0 18px;
+      color: var(--muted);
+      max-width: 58ch;
+      line-height: 1.55;
+      font-size: 15.5px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 520px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .card{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      padding: 14px;
+    }
+
+    .label{
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.68);
+      margin-bottom: 6px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .value{
+      font-weight:800;
+      font-size: 16px;
+    }
+
+    .hint{
+      margin-top: 6px;
+      color: rgba(255,255,255,0.68);
+      font-size: 13.5px;
+      line-height: 1.45;
+    }
+
+    .line{
+      height:1px;
+      background: rgba(255,255,255,0.10);
+      margin: 16px 0;
+    }
+
+    .stepper{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 12px 0 2px;
+    }
+
+    .step{
+      flex: 1 1 140px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 12px 12px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .step strong{
+      display:block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      letter-spacing:-.01em;
+    }
+
+    .step small{
+      color: rgba(255,255,255,0.68);
+      line-height: 1.35;
+      display:block;
+      font-size: 12.8px;
+    }
+
+    .glow{
+      position:absolute; inset:-40px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,59,122,0.22), transparent 55%);
+      opacity:0;
+      transition: opacity .25s ease;
+    }
+
+    .step.active .glow{opacity:1}
+
+    .controls{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    .input{
+      flex: 1 1 220px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.20);
+      padding: 12px 12px;
+    }
+
+    .input input{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      color: rgba(255,255,255,0.92);
+      font-size: 15px;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight:900;
+      letter-spacing:.01em;
+      transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
+      user-select:none;
+      min-width: 140px;
+    }
+
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{
+      color:#12040a;
+      background: linear-gradient(135deg, var(--hot), var(--hot2));
+      box-shadow: 0 18px 38px rgba(255,59,122,0.28);
+    }
+    .btn.ghost{
+      color: rgba(255,255,255,0.86);
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      min-width: 120px;
+    }
+    .btn.primary:hover{transform: translateY(-1px)}
+    .btn.ghost:hover{transform: translateY(-1px)}
+    .btn[disabled]{opacity:.45; cursor:not-allowed}
+
+    .right{
+      display:flex;
+      flex-direction:column;
+    }
+
+    .stage{
+      padding: 18px;
+      min-height: 440px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    .envelope{
+      width:min(360px, 90%);
+      aspect-ratio: 16 / 12;
+      position:relative;
+      transform: translateY(0);
+      transition: transform .35s ease;
+    }
+
+    .env-base{
+      position:absolute; inset:0;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.52);
+      overflow:hidden;
+    }
+
+    .env-flap{
+      position:absolute;
+      left: 8%;
+      top: -8%;
+      width: 84%;
+      height: 62%;
+      transform-origin: 50% 100%;
+      transform: rotateX(0deg);
+      transition: transform .55s cubic-bezier(.2,.9,.2,1);
+      background: linear-gradient(135deg, rgba(255,59,122,0.20), rgba(255,211,138,0.10));
+      border: 1px solid rgba(255,255,255,0.18);
+      border-bottom:0;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      border-top-left-radius: 14px;
+      border-top-right-radius: 14px;
+      filter: drop-shadow(0 16px 22px rgba(0,0,0,0.25));
+    }
+
+    .seal{
+      position:absolute;
+      left:50%; top:54%;
+      transform: translate(-50%,-50%);
+      width: 64px; height: 64px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), transparent 55%),
+                  linear-gradient(135deg, var(--hot), var(--hot2));
+      box-shadow: 0 16px 40px rgba(255,59,122,0.33);
+      border: 1px solid rgba(255,255,255,0.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      color: rgba(0,0,0,0.70);
+      letter-spacing: .02em;
+      user-select:none;
+    }
+
+    .letter{
+      position:absolute;
+      left: 9%;
+      bottom: 10%;
+      width: 82%;
+      height: 76%;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.16);
+      transform: translateY(22%);
+      transition: transform .55s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
+      opacity: 0;
+      padding: 16px 14px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .letter .mini{
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: rgba(255,255,255,0.72);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .letter .msg{
+      margin-top: 10px;
+      line-height:1.45;
+      font-size: 14.5px;
+      color: rgba(255,255,255,0.86);
+    }
+
+    .letter .sig{
+      margin-top: 12px;
+      font-weight: 900;
+      letter-spacing: .02em;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .envelope.open .env-flap{
+      transform: rotateX(180deg);
+    }
+    .envelope.open .letter{
+      transform: translateY(-2%);
+      opacity: 1;
+    }
+    .envelope.open{
+      transform: translateY(-4px);
+    }
+
+    .reveal{
+      width: min(520px, 96%);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.14));
+      padding: 16px;
+      display:none;
+    }
+
+    .reveal.show{display:block}
+
+    .big{
+      font-size: clamp(26px, 4.2vw, 44px);
+      letter-spacing:-.03em;
+      margin: 2px 0 8px;
+      font-weight: 1000;
+    }
+
+    .copy{
+      color: rgba(255,255,255,0.76);
+      line-height:1.55;
+      margin:0 0 12px;
+      font-size: 15.5px;
+    }
+
+    .choice{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+
+    .pill{
+      flex: 1 1 180px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      padding: 12px;
+    }
+
+    .pill strong{
+      display:block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+    .pill small{
+      display:block;
+      color: rgba(255,255,255,0.70);
+      line-height:1.35;
+    }
+
+    .final{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .status{
+      margin-top: 10px;
+      color: rgba(255,255,255,0.70);
+      font-size: 13.5px;
+      line-height:1.45;
+      min-height: 18px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform: translateX(-50%);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.72);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.92);
+      font-weight: 800;
+      letter-spacing:.01em;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.40);
+      z-index: 50;
+      max-width: 92vw;
+      text-align:center;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    .confetti{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index: 40;
+    }
+    .piece{
+      position:absolute;
+      top:-12px;
+      width:10px;
+      height:14px;
+      border-radius:3px;
+      opacity:.95;
+      animation: fall linear forwards;
+    }
+    @keyframes fall{
+      to{ transform: translateY(110vh) rotate(720deg); }
+    }
+
+    .tiny{
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.66);
+      margin-top: 6px;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.86);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .piece, .envelope, .env-flap, .letter, .noise{ animation:none !important; transition:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="confetti" id="confetti"></div>
+  <div class="toast" id="toast"></div>
+
+  <div class="wrap">
+    <div class="shell">
+      <!-- LEFT: Story + Controls -->
+      <section class="panel">
+        <div class="topline">
+          <div class="brand"><span class="dot"></span> LOVE QUEST</div>
+          <div class="chip" id="countdownChip">Loading countdown...</div>
+        </div>
+
+        <div class="content">
+          <h1 id="headline">A private invitation.</h1>
+          <p class="sub" id="subhead">
+            This is not a normal question. It is a curated experience.
+            Three steps. One answer.
+          </p>
+
+          <div class="grid">
+            <div class="card">
+              <div class="label">Today</div>
+              <div class="value" id="dateLine">Valentine's Day + Your Birthday</div>
+              <div class="hint" id="dateHint">A once-a-year combo. We are doing it properly.</div>
+            </div>
+            <div class="card">
+              <div class="label">Your itinerary</div>
+              <div class="value" id="itineraryLine">Massage 3:15 PM. Dinner 9:00 PM.</div>
+              <div class="hint">Everything in between is handled.</div>
+            </div>
+          </div>
+
+          <div class="line"></div>
+
+          <div class="stepper">
+            <div class="step active" id="step1">
+              <div class="glow"></div>
+              <strong>Step 1: Unlock</strong>
+              <small>Prove you are the intended recipient.</small>
+            </div>
+            <div class="step" id="step2">
+              <div class="glow"></div>
+              <strong>Step 2: Choose</strong>
+              <small>Pick the vibe for tonight.</small>
+            </div>
+            <div class="step" id="step3">
+              <div class="glow"></div>
+              <strong>Step 3: Answer</strong>
+              <small>One question. No pressure. Just love.</small>
+            </div>
+          </div>
+
+          <div class="controls" id="controls">
+            <div class="input">
+              <span class="kbd">PASS</span>
+              <input id="passInput" type="text" inputmode="text" autocomplete="off"
+                placeholder="Type her nickname (example: 'babe')" />
+            </div>
+            <button class="btn primary" id="unlockBtn">Unlock</button>
+            <button class="btn ghost" id="hintBtn">Hint</button>
+          </div>
+
+          <div class="status" id="status"></div>
+
+          <div class="tiny" id="tinyLine">
+            Tip: the password is a nickname you call her often. Case does not matter.
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Envelope + Reveal -->
+      <section class="panel right">
+        <div class="topline">
+          <div class="brand"><span class="dot"></span> THE ENVELOPE</div>
+          <div class="chip" id="stageChip">Locked</div>
+        </div>
+
+        <div class="stage" id="stage">
+          <div class="envelope" id="envelope">
+            <div class="env-flap"></div>
+            <div class="env-base"></div>
+            <div class="seal" id="seal">OPEN</div>
+
+            <div class="letter" id="letter">
+              <div class="mini">
+                <span id="toLine">To: My Favorite Person</span>
+                <span id="fromLine">From: Me</span>
+              </div>
+              <div class="msg" id="letterMsg">
+                Tonight is not just a date. It is a celebration of you.
+                I want you to feel chosen, protected, and adored.
+              </div>
+              <div class="sig" id="sigLine">- Yours</div>
+            </div>
+          </div>
+
+          <div class="reveal" id="reveal">
+            <div class="big" id="revealTitle">Choose the vibe.</div>
+            <p class="copy" id="revealCopy">
+              Pick one. This does not change the plan. It changes the feeling.
+            </p>
+
+            <div class="choice" id="choiceRow">
+              <div class="pill">
+                <strong>Soft and romantic</strong>
+                <small>Slow pace. Deep eye contact. Warm words. Calm energy.</small>
+              </div>
+              <div class="pill">
+                <strong>Playful and spicy</strong>
+                <small>Flirty teasing. Big laughs. A little danger. A lot of chemistry.</small>
+              </div>
+            </div>
+
+            <div class="final">
+              <button class="btn primary" id="romBtn">Soft and romantic</button>
+              <button class="btn ghost" id="playBtn">Playful and spicy</button>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="big" id="finalQ">Now the question.</div>
+            <p class="copy" id="finalCopy">
+              No speeches. No pressure. Just one honest answer.
+            </p>
+
+            <div class="final">
+              <button class="btn primary" id="yesBtn">Yes</button>
+              <button class="btn ghost" id="noBtn">Not today</button>
+            </div>
+
+            <div class="status" id="finalStatus"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // CUSTOMIZE THESE FIELDS
+    // -----------------------------
+    const CONFIG = {
+      girlfriendName: "Jada",     // Example: "Bri"
+      yourName: "Johnny",            // Example: "Johnny"
+      dinnerTimeLocal: "2026-02-14T21:00:00-05:00",  // Valentine dinner
+      massageTimeText: "3:15 PM",
+      dinnerTimeText: "9:00 PM",
+      // Password: a nickname you call her often (lowercase comparison)
+      password: "mama",
+      // Optional: a short personal line to make it hit harder
+      personalLine: "You are my favorite decision."
+    };
+
+    // -----------------------------
+    // DOM
+    // -----------------------------
+    const toast = document.getElementById("toast");
+    const confettiRoot = document.getElementById("confetti");
+
+    const headline = document.getElementById("headline");
+    const subhead = document.getElementById("subhead");
+    const itineraryLine = document.getElementById("itineraryLine");
+    const countdownChip = document.getElementById("countdownChip");
+
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const step3 = document.getElementById("step3");
+
+    const controls = document.getElementById("controls");
+    const status = document.getElementById("status");
+    const tinyLine = document.getElementById("tinyLine");
+
+    const passInput = document.getElementById("passInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const hintBtn = document.getElementById("hintBtn");
+
+    const stageChip = document.getElementById("stageChip");
+    const envelope = document.getElementById("envelope");
+    const seal = document.getElementById("seal");
+    const letter = document.getElementById("letter");
+    const letterMsg = document.getElementById("letterMsg");
+    const toLine = document.getElementById("toLine");
+    const fromLine = document.getElementById("fromLine");
+    const sigLine = document.getElementById("sigLine");
+
+    const reveal = document.getElementById("reveal");
+    const revealTitle = document.getElementById("revealTitle");
+    const revealCopy = document.getElementById("revealCopy");
+    const romBtn = document.getElementById("romBtn");
+    const playBtn = document.getElementById("playBtn");
+
+    const finalQ = document.getElementById("finalQ");
+    const finalCopy = document.getElementById("finalCopy");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const finalStatus = document.getElementById("finalStatus");
+
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2100);
+    }
+
+    function popConfetti(){
+      const colors = ["#ff3b7a","#ff7aa8","#ffd38a","#ffffff","#9b7bff"];
+      const pieces = 130;
+      for(let i=0;i<pieces;i++){
+        const el = document.createElement("div");
+        el.className = "piece";
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.width = (8 + Math.random()*10) + "px";
+        el.style.height = (10 + Math.random()*16) + "px";
+        el.style.animationDuration = (2.6 + Math.random()*1.9) + "s";
+        el.style.animationDelay = (Math.random()*0.15) + "s";
+        confettiRoot.appendChild(el);
+        setTimeout(() => el.remove(), 5200);
+      }
+    }
+
+    function setActiveStep(n){
+      [step1,step2,step3].forEach(s => s.classList.remove("active"));
+      if(n===1) step1.classList.add("active");
+      if(n===2) step2.classList.add("active");
+      if(n===3) step3.classList.add("active");
+    }
+
+    function normalize(s){
+      return String(s || "").trim().toLowerCase();
+    }
+
+    // -----------------------------
+    // Countdown to dinner
+    // -----------------------------
+    const dinnerDate = new Date(CONFIG.dinnerTimeLocal);
+    function tick(){
+      const now = new Date();
+      const ms = dinnerDate.getTime() - now.getTime();
+      if (isNaN(ms)){
+        countdownChip.textContent = "Countdown unavailable";
+        return;
+      }
+      if (ms <= 0){
+        countdownChip.textContent = "It is dinner time.";
+        return;
+      }
+      const totalMin = Math.floor(ms/60000);
+      const h = Math.floor(totalMin/60);
+      const m = totalMin % 60;
+      countdownChip.textContent = "Dinner in " + h + "h " + m + "m";
+    }
+    tick();
+    setInterval(tick, 15000);
+
+    // -----------------------------
+    // Initial copy
+    // -----------------------------
+    headline.textContent = "A private invitation for " + CONFIG.girlfriendName + ".";
+    subhead.textContent =
+      "This is not a normal question. It is a curated experience. " +
+      "Three steps. One answer. " + CONFIG.personalLine;
+
+    itineraryLine.textContent =
+      "Massage " + CONFIG.massageTimeText + ". Dinner " + CONFIG.dinnerTimeText + ".";
+
+    toLine.textContent = "To: " + CONFIG.girlfriendName;
+    fromLine.textContent = "From: " + CONFIG.yourName;
+    sigLine.textContent = "- " + CONFIG.yourName;
+
+    // -----------------------------
+    // Step 1: Unlock
+    // -----------------------------
+    function attemptUnlock(){
+      const guess = normalize(passInput.value);
+      const expected = normalize(CONFIG.password);
+
+      if(!guess){
+        status.textContent = "Type the password first.";
+        showToast("Type a nickname first.");
+        return;
+      }
+
+      if(guess !== expected){
+        status.textContent = "Not quite. Try again.";
+        showToast("Close. Try again.");
+        return;
+      }
+
+      // success
+      status.textContent = "";
+      showToast("Unlocked.");
+      stageChip.textContent = "Unlocked";
+      setActiveStep(2);
+
+      envelope.classList.add("open");
+      letterMsg.textContent =
+        "Tonight is not just a date. It is a celebration of you. " +
+        "I want you to feel chosen, protected, and adored. " +
+        "Now tap OPEN to continue.";
+
+      seal.textContent = "NEXT";
+      seal.style.cursor = "pointer";
+      unlockBtn.disabled = true;
+      passInput.disabled = true;
+      hintBtn.disabled = true;
+      tinyLine.textContent = "Unlocked. Tap NEXT on the envelope.";
+    }
+
+    unlockBtn.addEventListener("click", attemptUnlock);
+    passInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") attemptUnlock();
+    });
+
+    hintBtn.addEventListener("click", () => {
+      const first = CONFIG.password ? CONFIG.password.slice(0,1) : "";
+      status.textContent = "Hint: it starts with '" + first + "'.";
+      showToast("Hint dropped.");
+    });
+
+    // -----------------------------
+    // Step 2: Choose vibe
+    // -----------------------------
+    function goToVibe(){
+      if(!envelope.classList.contains("open")){
+        showToast("Unlock first.");
+        return;
+      }
+      stageChip.textContent = "Vibe selection";
+      setActiveStep(2);
+      reveal.classList.add("show");
+      envelope.style.display = "none";
+      showToast("Choose the vibe.");
+    }
+
+    seal.addEventListener("click", () => {
+      if (unlockBtn.disabled) goToVibe();
+      else showToast("Unlock first.");
+    });
+
+    function setVibe(vibe){
+      setActiveStep(3);
+      stageChip.textContent = "Final question";
+
+      if(vibe === "rom"){
+        revealTitle.textContent = "Soft and romantic selected.";
+        revealCopy.textContent =
+          "Tonight will be slow, warm, and intentional. " +
+          "I am going to love you out loud.";
+      } else {
+        revealTitle.textContent = "Playful and spicy selected.";
+        revealCopy.textContent =
+          "Tonight will be flirty, fun, and electric. " +
+          "I am going to keep you smiling all night.";
+      }
+
+      finalQ.textContent = "Will you be my Valentine?";
+      finalCopy.textContent = "One honest answer. I am right here.";
+      finalStatus.textContent = "";
+      showToast("Now the question.");
+    }
+
+    romBtn.addEventListener("click", () => setVibe("rom"));
+    playBtn.addEventListener("click", () => setVibe("play"));
+
+    // -----------------------------
+    // Step 3: Answer
+    // -----------------------------
+    yesBtn.addEventListener("click", () => {
+      popConfetti();
+      showToast("Locked in.");
+      stageChip.textContent = "She said yes";
+      finalStatus.textContent =
+        "Perfect. Screenshot this for me. Then come here. " +
+        "Happy birthday, my love.";
+
+      yesBtn.disabled = true;
+      noBtn.disabled = true;
+
+      revealTitle.textContent = "Confirmed.";
+      revealCopy.textContent =
+        "This is your official invitation. " +
+        "Now close this and let me take care of the rest.";
+    });
+
+    noBtn.addEventListener("click", () => {
+      showToast("Try again.");
+      finalStatus.textContent =
+        "That answer is not accepted. Not because I am pushy... " +
+        "but because you are my person. Tap YES when you are ready.";
+    });
+  </script>
+</body>
+</html>
