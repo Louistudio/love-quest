@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff4d8d" />
+  <title>For You</title>
+  <style>
+    :root{
+      --card: rgba(255,255,255,0.08);
+      --stroke: rgba(255,255,255,0.16);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --hot:#ff4d8d;
+      --hot2:#ff9cc4;
+      --gold:#ffd38a;
+      --shadow: 0 26px 80px rgba(0,0,0,0.55);
+      --r: 22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,77,141,0.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 35%, rgba(255,211,138,0.14), transparent 55%),
+        radial-gradient(1100px 800px at 50% 110%, rgba(140,90,255,0.12), transparent 55%),
+        linear-gradient(160deg, #090913, #180d18);
+      overflow:hidden;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px 14px 90px; /* bottom space for big clock */
+      position:relative;
+    }
+
+    /* floating hearts */
+    .hearts{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      opacity:0.55;
+    }
+    .h{
+      position:absolute;
+      bottom:-30px;
+      width:14px; height:14px;
+      transform: rotate(-45deg);
+      background: linear-gradient(135deg, var(--hot), var(--hot2));
+      border-radius:4px;
+      filter: drop-shadow(0 10px 18px rgba(255,77,141,0.25));
+      animation: floatUp linear forwards;
+    }
+    .h:before,.h:after{
+      content:"";
+      position:absolute;
+      width:14px;height:14px;
+      border-radius:50%;
+      background: inherit;
+      top:-7px; left:0;
+    }
+    .h:after{ left:7px; top:0 }
+    @keyframes floatUp{
+      to{
+        transform: translateY(-120vh) rotate(-45deg) rotate(260deg);
+        opacity:0;
+      }
+    }
+
+    .panel{
+      width:min(560px, 100%);
+      background: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent);
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size: 11px;
+      color: rgba(255,255,255,0.78);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:99px;
+      background: linear-gradient(135deg, var(--hot), var(--hot2));
+      box-shadow: 0 0 22px rgba(255,77,141,0.50);
+    }
+
+    .chip{
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.78);
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.18);
+      padding: 7px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .content{
+      padding: 18px 18px 20px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    /* polaroid */
+    .polaroid{
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .photo{
+      height: 250px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      position:relative;
+      overflow:hidden;
+
+      /* Put your photo in the repo as "us.jpg" (same folder as index.html) */
+      background-image:
+        linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.30)),
+        url("us.jpg");
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* develop overlay */
+    .develop{
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.80), rgba(0,0,0,0.18));
+      opacity:1;
+      transition: opacity .9s ease;
+    }
+    .photo.ready .develop{opacity:0}
+
+    .caption{
+      margin-top: 10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-end;
+      flex-wrap:wrap;
+    }
+    .capleft{
+      font-weight:1000;
+      letter-spacing:-.02em;
+      font-size: 18px;
+    }
+    .capright{
+      color: rgba(255,255,255,0.70);
+      font-size: 12.5px;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(26px, 4.6vw, 42px);
+      letter-spacing:-.03em;
+      line-height:1.06;
+    }
+    p{
+      margin:0;
+      color: var(--muted);
+      line-height:1.45;
+      font-size: 15.5px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .input{
+      flex: 1 1 220px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.18);
+      padding: 12px 12px;
+    }
+    .input input{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      color: rgba(255,255,255,0.92);
+      font-size: 15px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight:1000;
+      letter-spacing:.01em;
+      transition: transform .12s ease, opacity .12s ease;
+      user-select:none;
+      min-width: 140px;
+      touch-action: manipulation;
+    }
+    .btn:active{transform: translateY(1px)}
+    .primary{
+      color:#14040b;
+      background: linear-gradient(135deg, var(--hot), var(--hot2));
+      box-shadow: 0 18px 40px rgba(255,77,141,0.22);
+    }
+    .ghost{
+      color: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.14);
+      min-width: 120px;
+    }
+
+    .mini{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+    }
+
+    .q{
+      font-weight:1000;
+      font-size: 16px;
+      margin-bottom: 10px;
+      letter-spacing:-.01em;
+    }
+
+    .choices{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 520px){
+      .choices{grid-template-columns: 1fr}
+    }
+
+    .choice{
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.12);
+      padding: 12px;
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease;
+      user-select:none;
+      font-weight:900;
+      text-align:center;
+    }
+    .choice:active{transform: translateY(1px)}
+    .choice:hover{border-color: rgba(255,77,141,0.35)}
+    .choice.good{
+      border-color: rgba(255,211,138,0.55);
+      box-shadow: 0 16px 30px rgba(255,211,138,0.12);
+    }
+
+    .status{
+      color: rgba(255,255,255,0.78);
+      font-size: 13.5px;
+      min-height: 18px;
+      margin-top: 10px;
+    }
+
+    .center{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 8px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform: translateX(-50%);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.72);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.92);
+      font-weight: 900;
+      letter-spacing:.01em;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.40);
+      z-index: 50;
+      max-width: 92vw;
+      text-align:center;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* confetti */
+    .confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:40; }
+    .piece{
+      position:absolute; top:-12px;
+      width:10px; height:14px;
+      border-radius:3px;
+      opacity:.95;
+      animation: fall linear forwards;
+    }
+    @keyframes fall{
+      to{ transform: translateY(110vh) rotate(720deg); }
+    }
+
+    /* BIG countdown bar (numbers only) */
+    .bigclock{
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 14px 14px 18px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      pointer-events:none;
+      z-index: 60;
+    }
+    .bigclock .inner{
+      pointer-events:none;
+      display:inline-flex;
+      align-items:baseline;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 22px 60px rgba(0,0,0,0.55);
+    }
+    .bigclock .digits{
+      font-weight: 1000;
+      letter-spacing: .06em;
+      font-size: clamp(26px, 7.5vw, 48px);
+      line-height: 1;
+      color: rgba(255,255,255,0.94);
+      text-shadow: 0 10px 40px rgba(255,77,141,0.10);
+    }
+    .bigclock.hide{ display:none; }
+
+    /* NO runs away (smooth floating) */
+    #no.evade{
+      position: fixed !important;
+      z-index: 9999 !important;
+      transition: left .32s ease, top .32s ease, transform .32s ease;
+      will-change: left, top, transform;
+    }
+    #no.evade.bob{
+      animation: bob 1.25s ease-in-out infinite;
+    }
+    @keyframes bob{
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .h,.piece{ animation:none !important; }
+      .develop{ transition:none !important; }
+      #no.evade{ transition:none !important; }
+      #no.evade.bob{ animation:none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" id="hearts"></div>
+  <div class="confetti" id="confetti"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- Big countdown digits at bottom (hidden until YES) -->
+  <div class="bigclock hide" id="bigclock" aria-hidden="true">
+    <div class="inner">
+      <div class="digits" id="digits">00:00:00</div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <main class="panel">
+      <div class="top">
+        <div class="tag"><span class="dot"></span> for you</div>
+        <div class="chip" id="chip">✨ a tiny surprise</div>
+      </div>
+
+      <div class="content">
+
+        <section class="polaroid">
+          <div class="photo" id="photo">
+            <div class="develop"></div>
+          </div>
+          <div class="caption">
+            <div class="capleft" id="capleft">hey beautiful…</div>
+            <div class="capright" id="capright">tap to reveal</div>
+          </div>
+        </section>
+
+        <!-- Stage A: password -->
+        <div id="stageA">
+          <h1>PASSWORD.</h1>
+          <p>Hint: My Favorite Nickname For you 😌</p>
+
+          <div class="row">
+            <div class="input">
+              <input id="pass" type="text" autocomplete="off" placeholder="nickname" />
+            </div>
+            <button class="btn primary" id="go">enter</button>
+          </div>
+
+          <div class="status" id="s1"></div>
+        </div>
+
+        <!-- Stage B: mini quiz -->
+        <div id="stageB" style="display:none;">
+          <div class="mini">
+            <div class="q" id="qText">tiny quiz 😇</div>
+            <div class="choices" id="choices"></div>
+            <div class="status" id="s2"></div>
+          </div>
+
+          <div class="center">
+            <button class="btn ghost" id="skip">skip</button>
+          </div>
+        </div>
+
+        <!-- Stage C: question -->
+        <div id="stageC" style="display:none;">
+          <h1 id="bigQ">will you be my valentine?</h1>
+          <p id="p2">Birthday + Valentine… I’m lucky I get you.</p>
+
+          <div class="center">
+            <button class="btn primary" id="yes">yes 💗</button>
+            <button class="btn ghost" id="no">no 🙈</button>
+          </div>
+
+          <div class="status" id="s3"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ----------------------------
+    // CUSTOMIZE
+    // ----------------------------
+    const CONFIG = {
+      girlfriendName: "Jada",
+      yourName: "Johnny",
+      password: "mama", // lowercase compare
+      quiz: [
+        { q: "My Favorite Thing about you?", a: "ASSet 🍑 ", b: "Mindset", c: "BOFFUM", correct: "c" },
+        { q: "What is my love language?", a: "Words Of Affirmation", b: "Physical Touch", c: "Quality Time", correct: "a" },
+        { q: "Are You Mine?", a: "Yes", b: "Obviously", c: "Forever", correct: "c" }
+      ]
+    };
+
+    // ----------------------------
+    // DOM
+    // ----------------------------
+    const hearts = document.getElementById("hearts");
+    const confettiRoot = document.getElementById("confetti");
+    const toast = document.getElementById("toast");
+
+    const photo = document.getElementById("photo");
+    const capleft = document.getElementById("capleft");
+    const capright = document.getElementById("capright");
+    const chip = document.getElementById("chip");
+
+    const stageA = document.getElementById("stageA");
+    const stageB = document.getElementById("stageB");
+    const stageC = document.getElementById("stageC");
+
+    const pass = document.getElementById("pass");
+    const go = document.getElementById("go");
+    const s1 = document.getElementById("s1");
+
+    const qText = document.getElementById("qText");
+    const choices = document.getElementById("choices");
+    const s2 = document.getElementById("s2");
+    const skip = document.getElementById("skip");
+
+    const bigQ = document.getElementById("bigQ");
+    const p2 = document.getElementById("p2");
+    const yes = document.getElementById("yes");
+    const no = document.getElementById("no");
+    const s3 = document.getElementById("s3");
+
+    const bigclock = document.getElementById("bigclock");
+    const digits = document.getElementById("digits");
+
+    let countdownTimer = null;
+    let noArmed = false;
+
+    // ----------------------------
+    // Helpers
+    // ----------------------------
+    function norm(x){ return String(x||"").trim().toLowerCase(); }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(()=>toast.classList.remove("show"), 2000);
+    }
+
+    function popConfetti(){
+      const colors = ["#ff4d8d","#ff9cc4","#ffd38a","#ffffff","#9b7bff"];
+      const pieces = 140;
+      for(let i=0;i<pieces;i++){
+        const el = document.createElement("div");
+        el.className = "piece";
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.width = (8 + Math.random()*10) + "px";
+        el.style.height = (10 + Math.random()*16) + "px";
+        el.style.animationDuration = (2.6 + Math.random()*2.0) + "s";
+        el.style.animationDelay = (Math.random()*0.15) + "s";
+        confettiRoot.appendChild(el);
+        setTimeout(()=>el.remove(), 5200);
+      }
+    }
+
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    // Countdown target: Feb 14 00:00 local time (this year, else next year)
+    function valentinesTarget(){
+      const now = new Date();
+      const y = now.getFullYear();
+
+      // Feb is month 1 (0-based)
+      let t = new Date(y, 1, 14, 0, 0, 0, 0);
+
+      // If already passed, count to next year's Feb 14
+      if (t.getTime() <= now.getTime()){
+        t = new Date(y + 1, 1, 14, 0, 0, 0, 0);
+      }
+      return t;
+    }
+
+    function updateDigits(ms){
+      const total = Math.max(0, Math.floor(ms / 1000));
+      const hh = Math.floor(total / 3600);
+      const mm = Math.floor((total % 3600) / 60);
+      const ss = total % 60;
+      digits.textContent = pad2(hh) + ":" + pad2(mm) + ":" + pad2(ss);
+    }
+
+    function startBigCountdown(){
+      const target = valentinesTarget();
+      bigclock.classList.remove("hide");
+
+      if (countdownTimer) clearInterval(countdownTimer);
+
+      function tick(){
+        const ms = target.getTime() - Date.now();
+        if (ms <= 0){
+          digits.textContent = "00:00:00";
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+          return;
+        }
+        updateDigits(ms);
+      }
+
+      tick();
+      countdownTimer = setInterval(tick, 250);
+    }
+
+    // floating hearts loop
+    function spawnHeart(){
+      const el = document.createElement("div");
+      el.className = "h";
+      el.style.left = (Math.random()*100) + "vw";
+      el.style.animationDuration = (4.8 + Math.random()*3.6) + "s";
+      el.style.opacity = (0.30 + Math.random()*0.55);
+      const scale = 0.7 + Math.random()*1.35;
+      el.style.transform = "rotate(-45deg) scale(" + scale + ")";
+      hearts.appendChild(el);
+      setTimeout(()=>el.remove(), 9000);
+    }
+    setInterval(spawnHeart, 420);
+    for(let i=0;i<10;i++) setTimeout(spawnHeart, i*180);
+
+    // polaroid develop
+    photo.addEventListener("click", () => {
+      photo.classList.add("ready");
+      capright.textContent = "okay… continue 😌";
+      chip.textContent = "💞 unlocked vibes";
+      showToast("cute, right? 💗");
+    });
+
+    // personalize
+    capleft.textContent = "Hey "  + "Jada";
+    bigQ.textContent = CONFIG.girlfriendName + ", WILL YOU BE MY VALENTINE?";
+    p2.textContent = "Birthday + Valentine… I’m lucky I get you. - " + CONFIG.yourName;
+
+    // stage A: password
+    function enter(){
+      const guess = norm(pass.value);
+      if(!guess){
+        s1.textContent = "type something 😌";
+        showToast("type the nickname");
+        return;
+      }
+      if(guess !== norm(CONFIG.password)){
+        s1.textContent = "mm… close. try again 🙈";
+        showToast("try again");
+        return;
+      }
+      s1.textContent = "";
+      stageA.style.display = "none";
+      stageB.style.display = "block";
+      showToast("okay… Hi Mama");
+      startQuiz();
+    }
+
+    go.addEventListener("click", enter);
+    pass.addEventListener("keydown", (e) => { if(e.key==="Enter") enter(); });
+
+    // stage B: quiz
+    let qi = 0;
+
+    function startQuiz(){
+      qi = 0;
+      renderQ();
+    }
+
+    function renderQ(){
+      const item = CONFIG.quiz[qi];
+      qText.textContent = item.q;
+
+      choices.innerHTML = "";
+      const opts = [
+        {k:"a", t:item.a},
+        {k:"b", t:item.b},
+        {k:"c", t:item.c}
+      ];
+
+      for (let i=0; i<opts.length; i++){
+        const o = opts[i];
+        const d = document.createElement("div");
+        d.className = "choice";
+        d.textContent = o.t;
+        d.addEventListener("click", () => pick(o.k, d));
+        choices.appendChild(d);
+      }
+
+      s2.textContent = "";
+    }
+
+    function pick(k, el){
+      const item = CONFIG.quiz[qi];
+      if(k === item.correct){
+        el.classList.add("good");
+        showToast("correct 😌");
+        s2.textContent = "Okayyy you know me 😭";
+        setTimeout(() => {
+          qi++;
+          if(qi >= CONFIG.quiz.length){
+            stageB.style.display = "none";
+            stageC.style.display = "block";
+            showToast("final question…");
+            armNoFloat();
+          } else {
+            renderQ();
+          }
+        }, 700);
+      } else {
+        showToast("nope 🙈");
+        s2.textContent = "nice try 😭 pick again";
+      }
+    }
+
+    skip.addEventListener("click", () => {
+      stageB.style.display = "none";
+      stageC.style.display = "block";
+      showToast("okay okay… straight to it");
+      armNoFloat();
+    });
+
+    // NO runs away smoothly like it’s floating away
+    function randomEdgeSafePosition(btn){
+      const rect = btn.getBoundingClientRect();
+      const pad = 14;
+
+      const maxX = window.innerWidth - rect.width - pad;
+      const maxY = window.innerHeight - rect.height - pad;
+
+      // keep it in lower-ish area so it feels like it’s escaping the question
+      const minY = Math.max(pad, Math.floor(window.innerHeight * 0.45));
+      const y = Math.min(maxY, minY + Math.random() * (maxY - minY));
+      const x = pad + Math.random() * (maxX - pad);
+
+      return { x, y };
+    }
+
+    function moveNoAway(){
+      if (no.disabled) return;
+
+      no.classList.add("evade");
+      no.classList.add("bob");
+
+      // If first time, seed it near its current spot
+      if (!no.style.left || !no.style.top){
+        const r = no.getBoundingClientRect();
+        no.style.left = r.left + "px";
+        no.style.top  = r.top + "px";
+      }
+
+      const pos = randomEdgeSafePosition(no);
+      no.style.left = pos.x + "px";
+      no.style.top  = pos.y + "px";
+
+      showToast("nope 😭");
+    }
+
+    function armNoFloat(){
+      if (noArmed) return;
+      noArmed = true;
+
+      // On desktop: it runs when you hover
+      no.addEventListener("mouseenter", moveNoAway);
+
+      // On mobile: it runs when you try to tap it
+      no.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        moveNoAway();
+      }, { passive: false });
+
+      // Also: if she somehow clicks it, still run away
+      no.addEventListener("click", (e) => {
+        e.preventDefault();
+        moveNoAway();
+      });
+
+      // Give it an initial “float away” so she immediately gets it
+      setTimeout(moveNoAway, 350);
+    }
+
+    // YES click: confetti + big digits countdown at bottom
+    yes.addEventListener("click", () => {
+      popConfetti();
+      showToast("YESS 💗");
+
+      s3.textContent = "locked in. screenshot this for me 🥹💞";
+      yes.disabled = true;
+
+      // Freeze NO once she says yes
+      no.disabled = true;
+      no.classList.remove("bob");
+      no.classList.remove("evade");
+      no.style.left = "";
+      no.style.top = "";
+
+      chip.textContent = "SHE SAID YES 🎉";
+      capright.textContent = "okay… now watch this 😌";
+
+      startBigCountdown();
+    });
+  </script>
+</body>
+</html>
